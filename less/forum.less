@@ -1,0 +1,27 @@
+// The logo only belongs in the mobile navigation bar. On wider screens the
+// header already shows the forum's logo, so showing it twice would be a defect.
+// @screen-phone-max is core's own breakpoint, so this tracks Flarum rather than
+// repeating a magic 767px the way the original CSS tweak had to.
+.LinkRobinsMobileLogo {
+  display: none;
+}
+
+@media @phone {
+  .App-backControl {
+    .LinkRobinsMobileLogo {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 4px;
+      // The nav bar is a fixed height; never let a tall or wide image stretch it.
+      max-height: 100%;
+      overflow: hidden;
+    }
+
+    .LinkRobinsMobileLogo-image {
+      display: block;
+      width: auto;
+      max-width: 140px;
+      object-fit: contain;
+    }
+  }
+}

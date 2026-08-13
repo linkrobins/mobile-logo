@@ -1,0 +1,21 @@
+linkrobins-mobile-logo:
+
+  admin:
+    settings:
+      title: "Mobile Logo"
+      description: "Shows your forum's logo in the navigation bar on phones, where there is otherwise only a menu button."
+
+      source_label: "Which image to show"
+      source_help: "The favicon is usually square, which is the shape that fits a navigation bar. A wide wordmark logo often does not."
+      source_favicon: "Favicon (recommended)"
+      source_logo: "Forum logo"
+      source_custom: "A custom image"
+
+      custom_url_label: "Custom image address"
+      custom_url_help: "Only used when the setting above is set to a custom image. Paste a full web address to the image."
+
+      height_label: "Height in pixels"
+      height_help: "How tall the image is in the navigation bar. Between 16 and 64. Default is 32."
+
+      link_home_label: "Tapping the logo goes to the homepage"
+      link_home_help: "Turn this off to show the logo without making it a link."

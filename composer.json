@@ -1,0 +1,47 @@
+{
+    "name": "linkrobins/mobile-logo",
+    "description": "Puts your forum's logo in the mobile navigation bar, where phone users otherwise see only a menu button.",
+    "type": "flarum-extension",
+    "keywords": [
+        "flarum",
+        "mobile",
+        "logo",
+        "branding",
+        "header"
+    ],
+    "homepage": "https://linkrobins.com/extensions/mobile-logo",
+    "support": {
+        "issues": "https://github.com/linkrobins/mobile-logo/issues",
+        "source": "https://github.com/linkrobins/mobile-logo"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Link Robins",
+            "email": "karl@linkrobins.com",
+            "homepage": "https://linkrobins.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "flarum/core": "^2.0"
+    },
+    "minimum-stability": "beta",
+    "prefer-stable": true,
+    "extra": {
+        "flarum-extension": {
+            "title": "Link Robins Mobile Logo",
+            "category": "theme",
+            "icon": {
+                "name": "fas fa-mobile-screen",
+                "color": "#07adcc",
+                "backgroundColor": "#1a2535"
+            }
+        },
+        "flarum-cli": {
+            "modules": {
+                "githubActions": true
+            }
+        }
+    }
+}
