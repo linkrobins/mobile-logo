@@ -29,6 +29,18 @@ app.initializers.add('linkrobins/mobile-logo', () => {
   });
 
   registry.registerSetting({
+    setting: PREFIX + 'position',
+    type: 'select',
+    options: {
+      left: trans('position_left'),
+      right: trans('position_right'),
+    },
+    default: 'left',
+    label: trans('position_label'),
+    help: trans('position_help'),
+  });
+
+  registry.registerSetting({
     setting: PREFIX + 'height',
     type: 'number',
     min: 16,

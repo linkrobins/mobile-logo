@@ -14,6 +14,11 @@ linkrobins-mobile-logo:
       custom_url_label: "Custom image address"
       custom_url_help: "Only used when the setting above is set to a custom image. Paste a full web address to the image."
 
+      position_label: "Where the logo sits"
+      position_help: "To the left of the menu and back buttons, or to the right of them. Putting it right leaves those buttons against the edge of the screen, which is slightly easier to hit with a thumb."
+      position_left: "Left of the buttons"
+      position_right: "Right of the buttons"
+
       height_label: "Height in pixels"
       height_help: "How tall the image is in the navigation bar. Between 16 and 64. Default is 32."
 

@@ -69,8 +69,13 @@ app.initializers.add('linkrobins/mobile-logo', () => {
         )
       : m('span', { className: 'LinkRobinsMobileLogo' }, img);
 
-    // After the existing controls, so the back chevron and drawer button keep
-    // their position and hit area. The logo sits beside them.
-    vnode.children.push(logo);
+    // Left of the existing controls by default, so the logo is the first thing
+    // read on the bar. Putting it right keeps core's buttons at the very edge,
+    // which is the larger hit area, so both are offered.
+    if (app.forum.attribute('linkrobinsMobileLogoPosition') === 'right') {
+      vnode.children.push(logo);
+    } else {
+      vnode.children.unshift(logo);
+    }
   });
 });

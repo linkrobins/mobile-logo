@@ -23,6 +23,7 @@ Admin, then Extensions, then Link Robins Mobile Logo.
 |---|---|---|
 | Which image to show | Favicon | Favicon, your forum logo, or a custom image address. |
 | Custom image address | empty | Only used when the setting above is a custom image. |
+| Where the logo sits | Left of the buttons | Left or right of the menu and back buttons. Right leaves those buttons against the screen edge, which is a slightly easier thumb target. |
 | Height in pixels | 32 | How tall the image sits in the bar. Between 16 and 64. |
 | Tapping the logo goes to the homepage | on | Turn off to show the logo without making it a link. |
 
