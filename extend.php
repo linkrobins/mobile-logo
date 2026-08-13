@@ -18,10 +18,12 @@ return [
         // fits a navigation bar. A wide wordmark logo does not.
         ->default('linkrobins-mobile-logo.source', 'favicon')
         ->default('linkrobins-mobile-logo.custom_url', '')
+        ->default('linkrobins-mobile-logo.position', 'left')
         ->default('linkrobins-mobile-logo.height', '32')
         ->default('linkrobins-mobile-logo.link_home', true)
         ->serializeToForum('linkrobinsMobileLogoSource', 'linkrobins-mobile-logo.source')
         ->serializeToForum('linkrobinsMobileLogoCustomUrl', 'linkrobins-mobile-logo.custom_url')
+        ->serializeToForum('linkrobinsMobileLogoPosition', 'linkrobins-mobile-logo.position')
         ->serializeToForum('linkrobinsMobileLogoHeight', 'linkrobins-mobile-logo.height', 'intval')
         ->serializeToForum('linkrobinsMobileLogoLinkHome', 'linkrobins-mobile-logo.link_home', 'boolval'),
 ];
