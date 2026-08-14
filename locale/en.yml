@@ -12,7 +12,7 @@ linkrobins-mobile-logo:
       source_custom: "A custom image"
 
       custom_url_label: "Custom image address"
-      custom_url_help: "Only used when the setting above is set to a custom image. Paste a full web address to the image."
+      custom_url_help: "Only used when the setting above is set to a custom image. Best is a path on your own site, such as /assets/my-logo.png, so nothing about your visitors is shared with anyone else. A full address works too, but it must start with https, and hosting the image elsewhere means that host sees every visitor who loads a page. If the address is not usable, no logo is shown rather than a broken image."
 
       position_label: "Where the logo sits"
       position_help: "To the left of the menu and back buttons, or to the right of them. Putting it right leaves those buttons against the edge of the screen, which is slightly easier to hit with a thumb."

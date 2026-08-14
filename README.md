@@ -27,7 +27,9 @@ Admin, then Extensions, then Link Robins Mobile Logo.
 | Height in pixels | 32 | How tall the image sits in the bar. Between 16 and 64. |
 | Tapping the logo goes to the homepage | on | Turn off to show the logo without making it a link. |
 
-If the image you chose does not exist, nothing is shown rather than a broken image.
+If the image cannot be shown, nothing is shown rather than a broken image. That covers an address that is not usable, a file that is missing, and a plain `http://` image on an `https://` forum, which browsers block.
+
+A path on your own site such as `/assets/my-logo.png` is best. Hosting the image elsewhere works, but that host then sees every visitor who loads a page.
 
 ## Styling
 
