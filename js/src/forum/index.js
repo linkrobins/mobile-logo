@@ -120,13 +120,25 @@ app.initializers.add('linkrobins/mobile-logo', () => {
           'a',
           {
             className: 'LinkRobinsMobileLogo',
-            href: app.route('index'),
+            // The forum's base URL, and history.home() to navigate: exactly
+            // what core's own home-link does. Both resolve to '/', which Flarum
+            // maps to whatever the admin set as the default route.
+            //
+            // NOT app.route('index'): that is the discussion index specifically
+            // (/all), so on a forum with a custom homepage the logo went to the
+            // wrong place. Reported by Xkyer on discuss d/39682.
+            href: app.forum.attribute('baseUrl') || '/',
             // Let modifier-clicks and middle-clicks behave normally, the way
             // core's own home link does, so "open in new tab" still works.
             onclick: (e) => {
               if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return;
               e.preventDefault();
-              m.route.set(app.route('index'));
+
+              if (app.history && typeof app.history.home === 'function') {
+                app.history.home();
+              } else {
+                m.route.set('/');
+              }
             },
           },
           img
