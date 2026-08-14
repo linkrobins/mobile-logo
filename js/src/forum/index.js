@@ -5,6 +5,58 @@ import { extend } from 'flarum/common/extend';
 // externalize mithril, so importing it would bundle a second copy.
 const m = window.m;
 
+// The admin field offers 16 to 64. These re-apply that range at render time,
+// because the stored setting is not clamped and a value edited straight into
+// the database would otherwise reach the stylesheet.
+const MIN_HEIGHT = 16;
+const MAX_HEIGHT = 64;
+const DEFAULT_HEIGHT = 32;
+
+/**
+ * Vet an admin-supplied image address.
+ *
+ * Not an XSS defence: an <img src> does not execute a javascript: or data:
+ * URL, and Mithril escapes the attribute anyway. This is about the two ways a
+ * well-meant address silently produces no logo at all:
+ *
+ *  - a plain http:// image on an https:// forum is blocked as mixed content
+ *  - anything that is not http(s) is not an image the browser will fetch
+ *
+ * Refusing here means the logo is absent for a reason the admin can be told
+ * about, rather than absent with an error buried in the browser console.
+ */
+function vetUrl(raw) {
+  const value = String(raw || '').trim();
+
+  if (!value) return null;
+
+  // A relative path is same-origin by definition, which is the case we want to
+  // encourage: no third party sees your visitors.
+  if (value.startsWith('/')) return value;
+
+  try {
+    const parsed = new URL(value, window.location.href);
+
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+    if (window.location.protocol === 'https:' && parsed.protocol === 'http:') return null;
+
+    return parsed.href;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * How tall to draw it, clamped to the range the admin field offers.
+ */
+function logoHeight() {
+  const raw = parseInt(app.forum.attribute('linkrobinsMobileLogoHeight'), 10);
+
+  if (!Number.isFinite(raw) || raw <= 0) return DEFAULT_HEIGHT;
+
+  return Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, raw));
+}
+
 /**
  * Which image to show, resolved from settings against what the forum already has.
  *
@@ -16,7 +68,9 @@ function logoUrl() {
   const source = app.forum.attribute('linkrobinsMobileLogoSource') || 'favicon';
 
   if (source === 'custom') {
-    return app.forum.attribute('linkrobinsMobileLogoCustomUrl') || null;
+    // Only the custom address is vetted. The favicon and logo addresses come
+    // from Flarum itself and are already same-origin.
+    return vetUrl(app.forum.attribute('linkrobinsMobileLogoCustomUrl'));
   }
 
   if (source === 'logo') {
@@ -42,13 +96,23 @@ app.initializers.add('linkrobins/mobile-logo', () => {
 
     if (!vnode || !vnode.children || typeof vnode.children.push !== 'function') return;
 
-    const height = app.forum.attribute('linkrobinsMobileLogoHeight') || 32;
+    const height = logoHeight();
 
     const img = m('img', {
       className: 'LinkRobinsMobileLogo-image',
       src: url,
       alt: app.forum.attribute('title') || '',
       style: { height: height + 'px' },
+      // Vetting the address catches a bad scheme, but not a typo, a deleted
+      // file or a host that is simply down: those still resolve and then fail
+      // to load, leaving a broken-image icon in the navigation bar. Hide the
+      // whole thing when the image does not arrive, so a mistake costs an
+      // absent logo rather than a visible defect on every page.
+      onerror: (e) => {
+        const wrapper = e.target && e.target.parentNode;
+
+        if (wrapper && wrapper.style) wrapper.style.display = 'none';
+      },
     });
 
     const logo = app.forum.attribute('linkrobinsMobileLogoLinkHome')
