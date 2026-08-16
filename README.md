@@ -57,10 +57,9 @@ This extension exists for what a pseudo-element cannot do: it renders a real ima
 
 ```
 composer require linkrobins/mobile-logo
-php flarum extension:enable linkrobins-mobile-logo
 ```
 
-Installing does not switch it on. Enabling does, and it then uses your favicon until you tell it otherwise.
+Installing does not switch it on — enable it from your admin panel's Extensions page, and it then uses your favicon until you tell it otherwise.
 
 ## License
 
