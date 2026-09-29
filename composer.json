@@ -30,7 +30,7 @@
     "prefer-stable": true,
     "extra": {
         "flarum-extension": {
-            "title": "Link Robins Mobile Logo",
+            "title": "LR Mobile Logo",
             "category": "theme",
             "icon": {
                 "name": "fas fa-mobile-screen",
