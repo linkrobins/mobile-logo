@@ -1,5 +1,6 @@
 import app from 'flarum/forum/app';
 import { extend } from 'flarum/common/extend';
+import Navigation from 'flarum/common/components/Navigation';
 
 // The global Flarum exposes, not an import: flarum-webpack-config does not
 // externalize mithril, so importing it would bundle a second copy.
@@ -80,70 +81,108 @@ function logoUrl() {
   return app.forum.attribute('faviconUrl') || app.forum.attribute('logoUrl') || null;
 }
 
+/**
+ * The logo element, or null when there is nothing sensible to show.
+ */
+function buildLogo() {
+  const url = logoUrl();
+  if (!url) return null;
+
+  const height = logoHeight();
+
+  const img = m('img', {
+    className: 'LinkRobinsMobileLogo-image',
+    src: url,
+    alt: app.forum.attribute('title') || '',
+    style: { height: height + 'px' },
+    // Vetting the address catches a bad scheme, but not a typo, a deleted
+    // file or a host that is simply down: those still resolve and then fail
+    // to load, leaving a broken-image icon in the navigation bar. Hide the
+    // whole thing when the image does not arrive, so a mistake costs an
+    // absent logo rather than a visible defect on every page.
+    onerror: (e) => {
+      const wrapper = e.target && e.target.parentNode;
+
+      if (wrapper && wrapper.style) wrapper.style.display = 'none';
+    },
+  });
+
+  const logo = app.forum.attribute('linkrobinsMobileLogoLinkHome')
+    ? m(
+        'a',
+        {
+          className: 'LinkRobinsMobileLogo',
+          // The forum's base URL, and history.home() to navigate: exactly
+          // what core's own home-link does. Both resolve to '/', which Flarum
+          // maps to whatever the admin set as the default route.
+          //
+          // NOT app.route('index'): that is the discussion index specifically
+          // (/all), so on a forum with a custom homepage the logo went to the
+          // wrong place. Reported by Xkyer on discuss d/39682.
+          href: app.forum.attribute('baseUrl') || '/',
+          // Let modifier-clicks and middle-clicks behave normally, the way
+          // core's own home link does, so "open in new tab" still works.
+          onclick: (e) => {
+            if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return;
+            e.preventDefault();
+
+            if (app.history && typeof app.history.home === 'function') {
+              app.history.home();
+            } else {
+              m.route.set('/');
+            }
+          },
+        },
+        img
+      )
+    : m('span', { className: 'LinkRobinsMobileLogo' }, img);
+
+  return logo;
+}
+
+/**
+ * Only the mobile control strip carries App-backControl. Navigation is also
+ * mounted in the desktop header and the admin app, which this is not about.
+ */
+function isMobileStrip(component) {
+  const className = (component.attrs && component.attrs.className) || '';
+
+  return String(className).includes('App-backControl');
+}
+
+// Where the logo sits among core's controls. Core's strip is an ItemList
+// (drawer 100, back 90, pane 80; higher comes first), so left means above
+// all of them and right means below all of them.
+const PRIORITY_LEFT = 110;
+const PRIORITY_RIGHT = -10;
+
 app.initializers.add('linkrobins/mobile-logo', () => {
-  // extend, not override: Navigation's view returns a single element whose
-  // children we add to, so mutating in place is exactly what extend is for.
-  // (Returning a new vnode from an extend callback would be silently discarded.)
-  extend('flarum/common/components/Navigation', 'view', function (vnode) {
-    // Navigation is mounted in several places: the mobile back control, the
-    // header, and the admin app. Only the mobile one carries App-backControl,
-    // and that is the one this extension is about.
-    const className = (this.attrs && this.attrs.className) || '';
-    if (!String(className).includes('App-backControl')) return;
+  // Flarum 2.0.0 builds the strip from Navigation.items(), so the logo joins
+  // it as an item with an explicit position next to core's buttons.
+  if (typeof Navigation.prototype.items === 'function') {
+    extend('flarum/common/components/Navigation', 'items', function (items) {
+      if (!isMobileStrip(this)) return;
 
-    const url = logoUrl();
-    if (!url) return;
+      const logo = buildLogo();
+      if (!logo) return;
 
-    if (!vnode || !vnode.children || typeof vnode.children.push !== 'function') return;
+      const right = app.forum.attribute('linkrobinsMobileLogoPosition') === 'right';
 
-    const height = logoHeight();
-
-    const img = m('img', {
-      className: 'LinkRobinsMobileLogo-image',
-      src: url,
-      alt: app.forum.attribute('title') || '',
-      style: { height: height + 'px' },
-      // Vetting the address catches a bad scheme, but not a typo, a deleted
-      // file or a host that is simply down: those still resolve and then fail
-      // to load, leaving a broken-image icon in the navigation bar. Hide the
-      // whole thing when the image does not arrive, so a mistake costs an
-      // absent logo rather than a visible defect on every page.
-      onerror: (e) => {
-        const wrapper = e.target && e.target.parentNode;
-
-        if (wrapper && wrapper.style) wrapper.style.display = 'none';
-      },
+      items.add('linkrobins-mobile-logo', logo, right ? PRIORITY_RIGHT : PRIORITY_LEFT);
     });
 
-    const logo = app.forum.attribute('linkrobinsMobileLogoLinkHome')
-      ? m(
-          'a',
-          {
-            className: 'LinkRobinsMobileLogo',
-            // The forum's base URL, and history.home() to navigate: exactly
-            // what core's own home-link does. Both resolve to '/', which Flarum
-            // maps to whatever the admin set as the default route.
-            //
-            // NOT app.route('index'): that is the discussion index specifically
-            // (/all), so on a forum with a custom homepage the logo went to the
-            // wrong place. Reported by Xkyer on discuss d/39682.
-            href: app.forum.attribute('baseUrl') || '/',
-            // Let modifier-clicks and middle-clicks behave normally, the way
-            // core's own home link does, so "open in new tab" still works.
-            onclick: (e) => {
-              if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return;
-              e.preventDefault();
+    return;
+  }
 
-              if (app.history && typeof app.history.home === 'function') {
-                app.history.home();
-              } else {
-                m.route.set('/');
-              }
-            },
-          },
-          img
-        )
-      : m('span', { className: 'LinkRobinsMobileLogo' }, img);
+  // Older 2.0 betas and release candidates have no items(): add to the
+  // rendered children instead. extend, not override: mutating the vnode in
+  // place is what extend is for (a returned vnode would be discarded).
+  extend('flarum/common/components/Navigation', 'view', function (vnode) {
+    if (!isMobileStrip(this)) return;
+    if (!vnode || !vnode.children || typeof vnode.children.push !== 'function') return;
+
+    const logo = buildLogo();
+    if (!logo) return;
 
     // Left of the existing controls by default, so the logo is the first thing
     // read on the bar. Putting it right keeps core's buttons at the very edge,
