@@ -83,6 +83,14 @@ function logoUrl() {
 
 const RESERVE_CLASS = 'LinkRobinsMobileLogo-reserved';
 const RESERVE_VAR = '--linkrobins-mobile-logo-reserve';
+const SHIFT_CLASS = 'LinkRobinsMobileLogo-shifted';
+const SHIFT_LEFT_VAR = '--linkrobins-mobile-logo-title-left';
+const SHIFT_WIDTH_VAR = '--linkrobins-mobile-logo-title-width';
+
+// Core's phone title control: 200px wide, centered. The gap kept between it
+// and whatever sits on either side.
+const TITLE_WIDTH = 200;
+const GAP = 4;
 
 /**
  * Keep the page title's tap box clear of the logo.
@@ -90,9 +98,14 @@ const RESERVE_VAR = '--linkrobins-mobile-logo-reserve';
  * On phones core centers the title control at a fixed 200px, while the
  * navigation strip grows from the left edge with whatever it holds. Wide
  * phones leave room for both; a logo on a 412px screen pushes the strip 10px
- * into the title (Lighthouse "target-size"). The strip's real right edge is
- * measured and published as a CSS variable, and the stylesheet narrows the
- * title symmetrically so it starts after the strip.
+ * into the title (Lighthouse "target-size").
+ *
+ * The strip's real right edge is measured and published as a CSS variable.
+ * While the centered title clears it, nothing changes. When it would overlap,
+ * the title moves right instead: it starts GAP px after the strip and runs up
+ * to the right-hand controls (also measured, same gap), keeping its 200px if
+ * that fits and only narrowing when it does not. The stylesheet truncates the
+ * label with an ellipsis in that case.
  */
 function reserveSpace(logo) {
   const root = document.documentElement;
@@ -105,6 +118,10 @@ function reserveSpace(logo) {
     });
   }
 
+  root.classList.remove(SHIFT_CLASS);
+  root.style.removeProperty(SHIFT_LEFT_VAR);
+  root.style.removeProperty(SHIFT_WIDTH_VAR);
+
   // Hidden (desktop) or gone: nothing to reserve.
   if (!right) {
     root.classList.remove(RESERVE_CLASS);
@@ -114,14 +131,40 @@ function reserveSpace(logo) {
 
   root.classList.add(RESERVE_CLASS);
   root.style.setProperty(RESERVE_VAR, Math.ceil(right) + 'px');
+
+  const viewport = root.clientWidth;
+  const centeredLeft = (viewport - TITLE_WIDTH) / 2;
+  const left = Math.ceil(right) + GAP;
+
+  // The centered title already clears the strip: leave core alone.
+  if (left <= centeredLeft) return;
+
+  // The leftmost right-hand control (the page's primary action or its
+  // overflow menu). Only those in the right half count, so a stray hidden or
+  // zero-width element does not move the limit.
+  let limit = viewport;
+
+  document.querySelectorAll('.App-primaryControl').forEach((control) => {
+    const box = control.getBoundingClientRect();
+
+    if (box.width > 0 && box.height > 0 && box.left > viewport / 2) limit = Math.min(limit, box.left - GAP);
+  });
+
+  root.classList.add(SHIFT_CLASS);
+  root.style.setProperty(SHIFT_LEFT_VAR, left + 'px');
+  root.style.setProperty(SHIFT_WIDTH_VAR, Math.max(0, Math.min(TITLE_WIDTH, Math.floor(limit - left))) + 'px');
 }
 
 /**
  * Lifecycle hooks shared by both wrappers, so the reserve is re-measured
- * whenever the logo appears, changes or its image finishes loading.
+ * whenever the logo appears, changes or its image finishes loading, and when
+ * the page's right-hand controls change (a route change swaps them without
+ * touching the logo).
  */
 function reserveHooks() {
   let onResize = null;
+  let observer = null;
+  let frame = 0;
 
   return {
     oncreate: (vnode) => {
@@ -133,11 +176,28 @@ function reserveHooks() {
       const image = logo.querySelector('img');
       if (image && !image.complete) image.addEventListener('load', onResize);
 
+      if (typeof MutationObserver === 'function') {
+        observer = new MutationObserver(() => {
+          if (frame) return;
+
+          frame = window.requestAnimationFrame(() => {
+            frame = 0;
+            reserveSpace(logo);
+          });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+      }
+
       reserveSpace(logo);
     },
     onupdate: (vnode) => reserveSpace(vnode.dom),
     onremove: () => {
       if (onResize) window.removeEventListener('resize', onResize);
+      if (observer) observer.disconnect();
+      if (frame) window.cancelAnimationFrame(frame);
+
+      observer = null;
+      frame = 0;
 
       reserveSpace(null);
     },
