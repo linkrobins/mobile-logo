@@ -12,6 +12,13 @@
       display: inline-flex;
       align-items: center;
       margin-left: 4px;
+      // A tap target of at least 24x24 CSS px (WCAG 2.2 SC 2.5.8), however
+      // narrow the image is. Centered, so a narrow logo does not sit at the
+      // edge of its own hit area. The bar is already 46px tall, so nothing
+      // changes height.
+      justify-content: center;
+      min-width: 24px;
+      min-height: 24px;
       // The nav bar is a fixed height; never let a tall or wide image stretch it.
       max-height: 100%;
       overflow: hidden;

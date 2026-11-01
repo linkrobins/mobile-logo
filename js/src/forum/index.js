@@ -94,6 +94,13 @@ function buildLogo() {
     className: 'LinkRobinsMobileLogo-image',
     src: url,
     alt: app.forum.attribute('title') || '',
+    // Both attributes so the browser reserves the slot before the file
+    // arrives (Lighthouse "unsized images"). The image's real shape is not
+    // known here, so the slot is square, which is what favicons are; the CSS
+    // keeps width:auto, so once loaded the true ratio wins.
+    width: height,
+    height: height,
+    decoding: 'async',
     style: { height: height + 'px' },
     // Vetting the address catches a bad scheme, but not a typo, a deleted
     // file or a host that is simply down: those still resolve and then fail
