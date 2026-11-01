@@ -29,6 +29,8 @@ Admin, then Extensions, then Link Robins Mobile Logo.
 
 If the image cannot be shown, nothing is shown rather than a broken image. That covers an address that is not usable, a file that is missing, and a plain `http://` image on an `https://` forum, which browsers block.
 
+Use an image about twice the height you set (a 64 px square for the 32 px default). Your favicon file is often much larger than that, and this loads on every page; a small custom image is faster.
+
 A path on your own site such as `/assets/my-logo.png` is best. Hosting the image elsewhere works, but that host then sees every visitor who loads a page.
 
 ## Styling
