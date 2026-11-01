@@ -34,14 +34,34 @@
 
   // The title control is centered at a fixed 200px, which on a 412px phone
   // starts at 106px: under a logo in the strip (Lighthouse "target-size"
-  // overlap). The script publishes where the strip ends; the title keeps its
-  // centered position unless that would overlap, then narrows on both sides.
-  .LinkRobinsMobileLogo-reserved .App-titleControl {
-    --linkrobins-mobile-logo-start: ~"max(50% - 100px, var(--linkrobins-mobile-logo-reserve, 0px) + 4px)";
-
-    left: var(--linkrobins-mobile-logo-start);
-    right: var(--linkrobins-mobile-logo-start);
-    width: auto;
+  // overlap). The script publishes where the strip ends and leaves the title
+  // alone while the centered one clears it. Otherwise it is shifted right to
+  // start after the strip, up to the right-hand controls, keeping its 200px
+  // where there is room and narrowing only when there is not.
+  .LinkRobinsMobileLogo-shifted .App-titleControl {
+    left: var(--linkrobins-mobile-logo-title-left);
+    width: var(--linkrobins-mobile-logo-title-width);
     margin-left: 0;
+
+    // A narrowed label ends in an ellipsis instead of being cut mid-word.
+    // The caret is lifted out of the text flow so it stays visible.
+    > .Button {
+      // Core's buttons are flex or inline-flex, where an overflowing run of
+      // text is clipped rather than ellipsized; a block container ellipsizes.
+      display: block;
+      position: relative;
+      padding-right: 32px !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      > .icon {
+        position: absolute;
+        top: 50%;
+        right: 13px;
+        margin: 0;
+        transform: translateY(-50%);
+      }
+    }
   }
 }
