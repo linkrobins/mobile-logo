@@ -31,4 +31,17 @@
       object-fit: contain;
     }
   }
+
+  // The title control is centered at a fixed 200px, which on a 412px phone
+  // starts at 106px: under a logo in the strip (Lighthouse "target-size"
+  // overlap). The script publishes where the strip ends; the title keeps its
+  // centered position unless that would overlap, then narrows on both sides.
+  .LinkRobinsMobileLogo-reserved .App-titleControl {
+    --linkrobins-mobile-logo-start: ~"max(50% - 100px, var(--linkrobins-mobile-logo-reserve, 0px) + 4px)";
+
+    left: var(--linkrobins-mobile-logo-start);
+    right: var(--linkrobins-mobile-logo-start);
+    width: auto;
+    margin-left: 0;
+  }
 }
