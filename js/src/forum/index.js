@@ -81,6 +81,69 @@ function logoUrl() {
   return app.forum.attribute('faviconUrl') || app.forum.attribute('logoUrl') || null;
 }
 
+const RESERVE_CLASS = 'LinkRobinsMobileLogo-reserved';
+const RESERVE_VAR = '--linkrobins-mobile-logo-reserve';
+
+/**
+ * Keep the page title's tap box clear of the logo.
+ *
+ * On phones core centers the title control at a fixed 200px, while the
+ * navigation strip grows from the left edge with whatever it holds. Wide
+ * phones leave room for both; a logo on a 412px screen pushes the strip 10px
+ * into the title (Lighthouse "target-size"). The strip's real right edge is
+ * measured and published as a CSS variable, and the stylesheet narrows the
+ * title symmetrically so it starts after the strip.
+ */
+function reserveSpace(logo) {
+  const root = document.documentElement;
+  const strip = logo && logo.closest ? logo.closest('.App-backControl') : null;
+  let right = 0;
+
+  if (strip) {
+    Array.from(strip.children).forEach((child) => {
+      right = Math.max(right, child.getBoundingClientRect().right);
+    });
+  }
+
+  // Hidden (desktop) or gone: nothing to reserve.
+  if (!right) {
+    root.classList.remove(RESERVE_CLASS);
+    root.style.removeProperty(RESERVE_VAR);
+    return;
+  }
+
+  root.classList.add(RESERVE_CLASS);
+  root.style.setProperty(RESERVE_VAR, Math.ceil(right) + 'px');
+}
+
+/**
+ * Lifecycle hooks shared by both wrappers, so the reserve is re-measured
+ * whenever the logo appears, changes or its image finishes loading.
+ */
+function reserveHooks() {
+  let onResize = null;
+
+  return {
+    oncreate: (vnode) => {
+      const logo = vnode.dom;
+
+      onResize = () => reserveSpace(logo);
+      window.addEventListener('resize', onResize);
+
+      const image = logo.querySelector('img');
+      if (image && !image.complete) image.addEventListener('load', onResize);
+
+      reserveSpace(logo);
+    },
+    onupdate: (vnode) => reserveSpace(vnode.dom),
+    onremove: () => {
+      if (onResize) window.removeEventListener('resize', onResize);
+
+      reserveSpace(null);
+    },
+  };
+}
+
 /**
  * The logo element, or null when there is nothing sensible to show.
  */
@@ -119,6 +182,7 @@ function buildLogo() {
         'a',
         {
           className: 'LinkRobinsMobileLogo',
+          ...reserveHooks(),
           // The forum's base URL, and history.home() to navigate: exactly
           // what core's own home-link does. Both resolve to '/', which Flarum
           // maps to whatever the admin set as the default route.
@@ -142,7 +206,7 @@ function buildLogo() {
         },
         img
       )
-    : m('span', { className: 'LinkRobinsMobileLogo' }, img);
+    : m('span', { className: 'LinkRobinsMobileLogo', ...reserveHooks() }, img);
 
   return logo;
 }
