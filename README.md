@@ -8,6 +8,9 @@ Puts your forum's logo in the navigation bar on phones, where visitors otherwise
 - **Uses an image you already have.** By default it uses your favicon, because a favicon is square and that is the shape a navigation bar has room for. You can point it at your forum logo instead, or at any image address.
 - **Taps through to the homepage**, like the logo on desktop. You can turn that off and leave it as decoration.
 - **Stays out of the way on desktop**, where the header already shows your logo.
+- **Is easy to tap.** The logo always has a tap target of at least 24 by 24 pixels, even for a narrow image, so it meets the WCAG 2.2 minimum target size.
+- **Keeps the page title readable.** On phones Flarum centers the page title at a fixed width. If the logo and buttons would reach under it, the title shifts right to start just past the logo (and stops before the right-hand controls), narrowing with an ellipsis only when there is no room. When the centered title already clears the logo, nothing moves.
+- **Falls back sensibly.** If you pick the forum logo but have none uploaded, the favicon is used, and the other way around. If there is nothing to show, nothing is drawn.
 
 ## What it does NOT do
 
@@ -61,7 +64,14 @@ This extension exists for what a pseudo-element cannot do: it renders a real ima
 composer require linkrobins/mobile-logo
 ```
 
-Installing does not switch it on — enable it from your admin panel's Extensions page, and it then uses your favicon until you tell it otherwise.
+Then toggle it on in the admin panel's Extensions page. It uses your favicon until you tell it otherwise.
+
+### Updating
+
+```
+composer update linkrobins/mobile-logo
+php flarum cache:clear
+```
 
 ## License
 
